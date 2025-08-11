@@ -1,4 +1,6 @@
-from src.gitcrawler.main import main
+import asyncio
+
+from src.main import main
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

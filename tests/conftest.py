@@ -1,4 +1,5 @@
 pytest_plugins = [
-    "tests.fixtures.model_data",
+    "tests.fixtures.crawler",
+    "tests.fixtures.proxy",
     # "tests.fixtures.<your_module>",
 ]
