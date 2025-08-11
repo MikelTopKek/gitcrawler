@@ -13,8 +13,16 @@ from lxml import html
 
 from src.gitcrawler.models import ProxyConfig, RepositoryInfo, SearchResult
 from src.gitcrawler.proxy_manager import ProxyManager
-from src.settings import (DIRECT_TIMEOUT, GITHUB_BASE_URL, GITHUB_BASE_URL_SEARCH, GITHUB_HEADERS,
-    JSON_SELECTORS, MAX_CONCURRENT, PROXY_LIST, PROXY_TIMEOUT)
+from src.settings import (
+    DIRECT_TIMEOUT,
+    GITHUB_BASE_URL,
+    GITHUB_BASE_URL_SEARCH,
+    GITHUB_HEADERS,
+    JSON_SELECTORS,
+    MAX_CONCURRENT,
+    PROXY_LIST,
+    PROXY_TIMEOUT,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +33,11 @@ class GitHubCrawler:
     Supports "repositories", "issues", and "wikis" search with proxy rotation
     """
 
-    SUPPORTED_TYPES = ("repositories", "issues", "wikis",)
+    SUPPORTED_TYPES = (
+        "repositories",
+        "issues",
+        "wikis",
+    )
 
     def __init__(self, proxies: list[str] | None = None, output_dir: str = "results") -> None:
         self.session = None
@@ -222,7 +234,7 @@ class GitHubCrawler:
                     writer.writerow({"url": result.url})
 
         logger.info(f"Saved {len(results)} results to {filepath}")
-        
+
     async def search(self, keywords: list[str], search_type: str, extract_extra: bool = True) -> list[SearchResult]:
         """Perform GitHub search and extracting URLs"""
         if search_type.lower() not in self.SUPPORTED_TYPES:
@@ -243,28 +255,19 @@ class GitHubCrawler:
             if search_type.lower() == "repositories" and extract_extra and urls:
                 logger.info(f"Extracting repository info for {len(urls)} repositories...")
 
-                async def process_repo(url):
-                    repo_info = await self._extract_repository_info(url)
-                    result = SearchResult(url=url)
-                    if repo_info:
-                        result.extra = repo_info.model_dump()
-                    return result
+                semaphore = asyncio.Semaphore(MAX_CONCURRENT)
 
-                from itertools import islice
-                
-                def chunked(iterable, size):
-                    iterator = iter(iterable)
-                    while chunk := list(islice(iterator, size)):
-                        yield chunk
-                
-                results = []
-                chunk_size = 5 
-                
-                for chunk_urls in chunked(urls, chunk_size):
-                    tasks = [process_repo(url) for url in chunk_urls]
-                    chunk_results = await asyncio.gather(*tasks, return_exceptions=True)
-                    chunk_results = [r for r in chunk_results if not isinstance(r, Exception)]
-                    results.extend(chunk_results)
+                async def process_repo(url):
+                    async with semaphore:
+                        repo_info = await self._extract_repository_info(url)
+                        result = SearchResult(url=url)
+                        if repo_info:
+                            result.extra = repo_info.model_dump()
+                        return result
+
+                tasks = [process_repo(url) for url in urls]
+                results = await asyncio.gather(*tasks, return_exceptions=True)
+                results = [r for r in results if not isinstance(r, Exception)]
             else:
                 results = [SearchResult(url=url) for url in urls]
 
