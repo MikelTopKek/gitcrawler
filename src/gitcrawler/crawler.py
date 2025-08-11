@@ -20,7 +20,6 @@ from src.settings import (
     GITHUB_HEADERS,
     JSON_SELECTORS,
     MAX_CONCURRENT,
-    PROXY_LIST,
     PROXY_TIMEOUT,
 )
 
@@ -279,7 +278,7 @@ class GitHubCrawler:
     async def crawl(self, config: dict[str, Any]) -> list[SearchResult]:
         """Perform crawling according to configs"""
         keywords = config.get("keywords", [])
-        proxies = PROXY_LIST
+        proxies = config.get("proxies", [])
         search_type = config.get("type", "repositories")
 
         if not keywords:
