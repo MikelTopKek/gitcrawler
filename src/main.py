@@ -1,17 +1,17 @@
 import logging
 
 from src.gitcrawler.crawler import GitHubCrawler
-from src.settings import PROXY_LIST
+from src.settings import PROXY_LIST, SEARCHING_KEYWORDS, SEARCHING_TYPE
 
 logger = logging.getLogger(__name__)
 
 
-async def main():
+async def   main():
     """Example usage"""
     config = {
-        "keywords": ["python", "machine-learning"],
+        "keywords": SEARCHING_KEYWORDS,
         "proxies": PROXY_LIST,
-        "type": "repositories",
+        "type": SEARCHING_TYPE,
     }
 
     crawler = GitHubCrawler()

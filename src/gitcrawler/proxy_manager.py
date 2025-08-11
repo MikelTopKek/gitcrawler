@@ -22,7 +22,6 @@ class ProxyManager:
             self.failed_proxies.clear()
             available_proxies = self.proxies
 
-        if not available_proxies:
             return None
 
         proxy = available_proxies[self.proxy_index % len(available_proxies)]

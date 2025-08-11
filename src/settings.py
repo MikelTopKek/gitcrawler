@@ -12,6 +12,9 @@ PROXY_TIMEOUT = 3
 DIRECT_TIMEOUT = 10
 MAX_CONCURRENT = 3
 
+SEARCHING_TYPE = "repositories"
+SEARCHING_KEYWORDS = ["python", "jwt"]
+
 JSON_SELECTORS = [
     '//script[@data-target="react-app.embeddedData"]/text()',
     '//script[contains(@data-target, "embeddedData")]/text()',
